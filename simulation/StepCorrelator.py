@@ -30,7 +30,7 @@ class StepCorrelator:
         self._left_sum = 0.0
         self._right_sum = 0.0
 
-    def PushSample(self, v: Union[float, int]) -> float:
+    def ProcessSample(self, v: Union[float, int]) -> float:
         """
         Push one new sample. Returns:
           - np.nan until 2*lengthStep samples have been accumulated
@@ -44,14 +44,14 @@ class StepCorrelator:
         if len(self._left) < M:
             self._left.append(v)
             self._left_sum += v
-            return np.nan
+            return 0
 
         # Fill right window
         if len(self._right) < M:
             self._right.append(v)
             self._right_sum += v
             if len(self._right) < M:
-                return np.nan
+                return 0
             return self._current_value()
 
         # Steady-state slide by 1
@@ -67,16 +67,6 @@ class StepCorrelator:
         self._right_sum += v
 
         return self._current_value()
-
-    def PushSamples(self, x: np.ndarray) -> np.ndarray:
-        """
-        Convenience: push an array in streaming mode and get one output per input.
-        """
-        x = np.asarray(x, dtype=float)
-        out = np.empty(x.size, dtype=float)
-        for i, v in enumerate(x):
-            out[i] = self.PushSample(v)
-        return out
 
     def _current_value(self) -> float:
         y = self._right_sum - self._left_sum

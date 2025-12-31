@@ -4,12 +4,13 @@ import matplotlib.pyplot as plt
 from ChannelAWGN import ChannelAWGN
 from Goertzel import GoertzelFilter
 from StepCorrelator import StepCorrelator
+from PeakDetector import PeakDetector
 
 ## Parameter Section
-SIM_DURATION = 4
+SIM_DURATION = 10
 FS = 24e3
 TS = (1 / FS)
-AWGN_CHANNEL_SNR = -3
+AWGN_CHANNEL_SNR = -10
 GOERTZEL_ANALYZATION_DURATION = 0.01
 ANALYZATION_BATCH_LENGTH = int(np.round(GOERTZEL_ANALYZATION_DURATION / TS))
 STEP_CORRELATION_STEP_LENGTH = 4
@@ -46,22 +47,25 @@ dcf77_batches = list(dcf77_signal_awgn[:dcf77_signal_last_sample_idx].reshape(-1
 ## Processing Section
 goertzelFilter = GoertzelFilter(5.5e3, FS, ANALYZATION_BATCH_LENGTH)
 stepCorrelator = StepCorrelator(STEP_CORRELATION_STEP_LENGTH, True)
+peakDetector = PeakDetector(0.01, 2)
 
-goertzelResults = np.empty(len(dcf77_batches))
-stepCorrelatorResults = np.empty(len(dcf77_batches))
+goertzelResults = np.zeros(len(dcf77_batches))
+stepCorrelatorResults = np.zeros(len(dcf77_batches))
+peakDetectorResults = np.zeros(len(dcf77_batches))
 for i in range(len(dcf77_batches)):
     goertzelResults[i] = goertzelFilter.ProcessSamples(dcf77_batches[i])
-    stepCorrelatorResults[i] = stepCorrelator.PushSample(goertzelResults[i])
+    stepCorrelatorResults[i] = stepCorrelator.ProcessSample(goertzelResults[i])
+    peakDetectorResults[i] = peakDetector.ProcessSample(stepCorrelatorResults[i])
 
 
 ## Plotting Section
 fig, axs = plt.subplots(5)
 plt.setp(axs, xlim=[0, SIM_DURATION])
-axs[0].plot(t, timecode_signal)
-axs[1].plot(t, dcf77_signal)
-axs[2].plot(t, dcf77_signal_awgn)
+axs[0].plot(t, dcf77_signal)
+axs[1].plot(t, dcf77_signal_awgn)
 
 t_batch = np.arange(0, SIM_DURATION, GOERTZEL_ANALYZATION_DURATION)
-axs[3].stem(t_batch, goertzelResults)
-axs[4].stem(t_batch, stepCorrelatorResults)
+axs[2].stem(t_batch, goertzelResults)
+axs[3].stem(t_batch, stepCorrelatorResults)
+axs[4].stem(t_batch, peakDetectorResults)
 plt.show()
