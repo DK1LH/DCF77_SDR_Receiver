@@ -59,13 +59,23 @@ for i in range(len(dcf77_batches)):
 
 
 ## Plotting Section
-fig, axs = plt.subplots(5)
+fig, axs = plt.subplots(5, figsize=(10, 7))
+fig.tight_layout()
 plt.setp(axs, xlim=[0, SIM_DURATION])
+
+axs[0].set_title("Raw DCF77 RF signal")
 axs[0].plot(t, dcf77_signal)
+
+axs[1].set_title("Raw DCF77 RF signal after AWGN-channel")
 axs[1].plot(t, dcf77_signal_awgn)
 
 t_batch = np.arange(0, SIM_DURATION, GOERTZEL_ANALYZATION_DURATION)
+axs[2].set_title("Results of the Goertzel Filter")
 axs[2].stem(t_batch, goertzelResults)
+
+axs[3].set_title("Results of the Step Correlator")
 axs[3].stem(t_batch, stepCorrelatorResults)
+
+axs[4].set_title("Results of the Peak Detector")
 axs[4].stem(t_batch, peakDetectorResults)
 plt.show()
