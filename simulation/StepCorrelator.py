@@ -1,10 +1,11 @@
-import numpy as np
 from collections import deque
 from typing import Union
 
 class StepCorrelator:
     """
-    Online Step correlator for finding falling and rising edges of a signal
+    Docstring for StepCorrelator
+
+    Online Step correlator for finding falling and rising edges of a signal.
     """
 
     def __init__(self, lengthStep: int, normalize: bool = True):
