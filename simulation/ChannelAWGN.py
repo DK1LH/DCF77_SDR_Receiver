@@ -1,31 +1,19 @@
 import numpy as np
 
-def ChannelAWGN(x: np.ndarray, snr_db: float, rng=None, axis=None):
+def ChannelAWGN(x: np.ndarray, snr_db: float, rng=None, axis=None) -> np.ndarray:
     """
-    Add AWGN to signal x to obtain a specified SNR (in dB).
+    Adding AWGN to a signal to obtain a specified SNR
 
-    SNR is defined as:
-        SNR = P_signal / P_noise
-    where P_signal = mean(|x|^2) and P_noise = mean(|n|^2).
-
-    Parameters
-    ----------
-    x : np.ndarray
-        Input signal (real or complex).
-    snr_db : float
-        Target SNR in dB.
-    rng : None | int | np.random.Generator
-        Random seed or Generator for reproducibility.
-    axis : None | int | tuple[int]
-        If None: use total average power over all samples.
-        If set: compute power along this axis (keeps dims) so each "channel"
-        (e.g. rows or columns) gets its own noise scaling.
-
-    Returns
-    -------
-    y : np.ndarray
-        Noisy signal, same shape/dtype (complex stays complex).
+    :param x: Real input signal
+    :type x: np.ndarray
+    :param snr_db: Desired output SNR in dB
+    :type snr_db: float
+    :param rng: Random seed or Generator
+    :param axis: Leave none to average over all samples
+    :return: Array after AWGN-Channel
+    :rtype: ndarray[_AnyShape, dtype[Any]]
     """
+
     x = np.asarray(x)
 
     # Random generator handling
