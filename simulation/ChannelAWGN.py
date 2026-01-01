@@ -2,15 +2,17 @@ import numpy as np
 
 def ChannelAWGN(x: np.ndarray, snr_db: float, rng=None, axis=None) -> np.ndarray:
     """
-    Adding AWGN to a signal to obtain a specified SNR
+    Docstring for ChannelAWGN
+    
+    Adding AWGN to a signal to obtain a specified SNR.
 
-    :param x: Real input signal
+    :param x: Real input signal.
     :type x: np.ndarray
-    :param snr_db: Desired output SNR in dB
+    :param snr_db: Desired output SNR in dB.
     :type snr_db: float
-    :param rng: Random seed or Generator
-    :param axis: Leave none to average over all samples
-    :return: Array after AWGN-Channel
+    :param rng: Random seed or Generator.
+    :param axis: Leave none to average over all samples.
+    :return: Array after AWGN-Channel.
     :rtype: ndarray[_AnyShape, dtype[Any]]
     """
 
