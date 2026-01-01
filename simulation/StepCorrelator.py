@@ -4,12 +4,19 @@ from typing import Union
 
 class StepCorrelator:
     """
-    Step correlator with kernel [-1..-1, +1..+1] (lengthStep each side).
-    Supports:
-      - Block mode:   ProcessSamples(x)  -> y (same length, centered output)
-      - Streaming:    PushSample(v)      -> y_value (aligned to newest sample), NaN until ready
+    Online Step correlator for finding falling and rising edges of a signal
     """
+
     def __init__(self, lengthStep: int, normalize: bool = True):
+        """
+        Docstring for __init__
+        
+        :param lengthStep: Length of the correlation function.
+        :type lengthStep: int
+        :param normalize: Normalize correlation function for decupling the result from the correlation function's length.
+        :type normalize: bool
+        """
+
         if lengthStep <= 0:
             raise ValueError("lengthStep must be > 0")
         self.lengthStep = int(lengthStep)
@@ -21,9 +28,7 @@ class StepCorrelator:
         self._left_sum: float = 0.0
         self._right_sum: float = 0.0
 
-    # ------------------------
-    # Streaming / sliding mode
-    # ------------------------
+
     def Reset(self) -> None:
         self._left.clear()
         self._right.clear()
@@ -32,11 +37,16 @@ class StepCorrelator:
 
     def ProcessSample(self, v: Union[float, int]) -> float:
         """
-        Push one new sample. Returns:
-          - np.nan until 2*lengthStep samples have been accumulated
-          - then the step correlation value for the boundary between left/right windows
-            (aligned to the newest sample at the end of the right window)
+        Docstring for ProcessSample
+
+        Function to process a new sample and get the current step correlation output value.
+
+        :param v: New input sample.
+        :type v: Union[float, int]
+        :return: Step correlation value for the boundary between left/right windows (aligned to the newest sample at the end of the right window).
+        :rtype: float
         """
+
         v = float(v)
         M = self.lengthStep
 
@@ -69,36 +79,12 @@ class StepCorrelator:
         return self._current_value()
 
     def _current_value(self) -> float:
+        """
+        Docstring for _current_value
+        
+        :return: Current step correlation value.
+        :rtype: float
+        """
+
         y = self._right_sum - self._left_sum
         return y / self.lengthStep if self.normalize else y
-
-    # ------------------------
-    # Block mode (your original)
-    # ------------------------
-    def ProcessSamples(self, x: np.ndarray) -> np.ndarray:
-        """
-        Block processing, centered output:
-          y[k] = mean(x[k:k+M]) - mean(x[k-M:k]) for k in [M, N-M)
-        """
-        x = np.asarray(x, dtype=float)
-        N = x.size
-        y = np.zeros(N, dtype=float)
-        M = self.lengthStep
-
-        if N < 2 * M + 1:
-            return y
-
-        p = np.zeros(N + 1, dtype=float)
-        p[1:] = np.cumsum(x)
-
-        def sum_range(a: int, b: int) -> float:  # [a, b)
-            return p[b] - p[a]
-
-        scale = float(M) if self.normalize else 1.0
-
-        for k in range(M, N - M):
-            left = sum_range(k - M, k)
-            right = sum_range(k, k + M)
-            y[k] = (right - left) / scale
-
-        return y
